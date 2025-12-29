@@ -1,0 +1,3 @@
+@echo off
+echo Starting AI Finance Agent Frontend...
+npm run dev
