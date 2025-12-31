@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Environment
+.env
+.env.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data
+data/vector_db/
+data/checkpoints/
+*.db
+*.sqlite
+
+# Logs
+logs/
+*.log
+
+# Email credentials
+credentials.json
+token.json
+*.pickle
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+*.tmp
+temp/
