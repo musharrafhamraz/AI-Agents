@@ -41,8 +41,22 @@ Benefits:
 - ✅ Free tier available
 - ✅ Auto-scaling and monitoring
 - ✅ HTTPS enabled by default
+- ✅ **Automatic posting built-in** - Posts 28 times per week automatically!
 
 ### Option 2: Run Locally 💻
+
+Run on your own computer or server with automatic posting.
+
+## ⚡ Automatic Posting
+
+**NEW!** The scheduler is now integrated directly into the API server. When you start the server, automatic posting starts immediately!
+
+- 📅 **28 posts per week** (3-5 posts per day)
+- 🤖 **Fully automated** - No manual intervention
+- 🎨 **Varied content** - Rotates through 15 themes
+- ⏰ **Smart scheduling** - Posts at optimal times
+
+See **[INTEGRATED_SCHEDULER.md](INTEGRATED_SCHEDULER.md)** for details.
 
 ## 🚀 Quick Start
 

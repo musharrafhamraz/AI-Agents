@@ -7,6 +7,9 @@ from typing import Optional, List
 from datetime import datetime
 import os
 from loguru import logger
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+import random
 
 # Import Instagram automation components
 from src.agents import ContentCreatorAgent, ImageGeneratorAgent, PostingAgent, EngagementAgent
@@ -25,6 +28,28 @@ app = FastAPI(
     description="AI-powered Instagram content creation and automation",
     version="1.0.0"
 )
+
+# Initialize scheduler
+scheduler = AsyncIOScheduler()
+
+# Content themes for variety
+CONTENT_THEMES = [
+    "morning motivation",
+    "inspirational quotes",
+    "emotional reflection",
+    "romantic thoughts",
+    "life lessons",
+    "self-love and growth",
+    "mindfulness and peace",
+    "gratitude and positivity",
+    "overcoming challenges",
+    "dreams and aspirations",
+    "inner strength",
+    "beautiful moments",
+    "heartfelt emotions",
+    "personal growth",
+    "finding happiness"
+]
 
 
 # Request/Response Models
@@ -64,15 +89,136 @@ class HealthResponse(BaseModel):
     services: dict
 
 
+# Scheduled posting function
+async def scheduled_post():
+    """Automatically create and post content."""
+    try:
+        # Select random theme for variety
+        theme = random.choice(CONTENT_THEMES)
+        
+        logger.info(f"🤖 Scheduled post starting - Theme: {theme}")
+        
+        # Step 1: Generate content
+        content_agent = ContentCreatorAgent()
+        content_result = await content_agent.create_content(
+            theme=theme,
+            brand_voice=settings.brand_voice,
+            target_audience=settings.target_audience,
+            brand_name=settings.brand_name
+        )
+        
+        if content_result.get("errors"):
+            logger.error(f"Content generation failed: {content_result['errors']}")
+            return
+        
+        caption = content_result.get("caption", "")
+        hashtags = content_result.get("hashtags", [])
+        image_prompt = content_result.get("image_prompt", "")
+        
+        # Step 2: Generate image
+        image_agent = ImageGeneratorAgent()
+        image_result = await image_agent.generate_image(image_prompt)
+        
+        if image_result.get("errors"):
+            logger.error(f"Image generation failed: {image_result['errors']}")
+            return
+        
+        image_url = image_result.get("image_url", "")
+        
+        # Step 3: Publish to Instagram
+        posting_agent = PostingAgent()
+        publish_result = await posting_agent.publish_post(
+            image_url=image_url,
+            caption=caption,
+            hashtags=hashtags,
+            auto_publish=True
+        )
+        
+        if publish_result.get("errors"):
+            logger.error(f"Publishing failed: {publish_result['errors']}")
+            return
+        
+        media_id = publish_result.get("instagram_media_id", "")
+        logger.info(f"✅ Scheduled post published! Media ID: {media_id}, Theme: {theme}")
+        
+    except Exception as e:
+        logger.error(f"Scheduled post error: {e}")
+
+
+# Startup event - Initialize scheduler
+@app.on_event("startup")
+async def startup_event():
+    """Start the scheduler when the app starts."""
+    logger.info("🚀 Starting Instagram Automation API...")
+    
+    # Configure posting schedule
+    # MONDAY - 4 posts
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='mon', hour=9, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='mon', hour=13, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='mon', hour=17, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='mon', hour=20, minute=0))
+    
+    # TUESDAY - 3 posts
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='tue', hour=10, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='tue', hour=14, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='tue', hour=19, minute=0))
+    
+    # WEDNESDAY - 5 posts
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='wed', hour=8, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='wed', hour=11, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='wed', hour=14, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='wed', hour=17, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='wed', hour=21, minute=0))
+    
+    # THURSDAY - 4 posts
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='thu', hour=9, minute=30))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='thu', hour=13, minute=30))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='thu', hour=16, minute=30))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='thu', hour=20, minute=30))
+    
+    # FRIDAY - 5 posts
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='fri', hour=8, minute=30))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='fri', hour=11, minute=30))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='fri', hour=14, minute=30))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='fri', hour=18, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='fri', hour=21, minute=30))
+    
+    # SATURDAY - 4 posts
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='sat', hour=10, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='sat', hour=14, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='sat', hour=18, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='sat', hour=21, minute=0))
+    
+    # SUNDAY - 3 posts
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='sun', hour=11, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='sun', hour=16, minute=0))
+    scheduler.add_job(scheduled_post, CronTrigger(day_of_week='sun', hour=20, minute=0))
+    
+    # Start the scheduler
+    scheduler.start()
+    logger.info("✅ Scheduler started - 28 posts per week configured")
+    logger.info("📅 Schedule: Mon(4), Tue(3), Wed(5), Thu(4), Fri(5), Sat(4), Sun(3)")
+
+
+# Shutdown event - Stop scheduler
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Stop the scheduler when the app shuts down."""
+    scheduler.shutdown()
+    logger.info("⏹️  Scheduler stopped")
+
+
 # Health Check Endpoint
 @app.get("/", response_model=HealthResponse)
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
-    """Health check endpoint for Render.com monitoring."""
+    """Health check endpoint for monitoring."""
     services = {
         "api": "healthy",
         "google_gemini": "configured" if settings.google_api_key else "missing",
-        "instagram_api": "configured" if settings.instagram_access_token else "missing"
+        "instagram_api": "configured" if settings.instagram_access_token else "missing",
+        "scheduler": "running" if scheduler.running else "stopped",
+        "scheduled_jobs": len(scheduler.get_jobs())
     }
     
     return {
@@ -252,6 +398,48 @@ async def test_connections():
         results["image_generation"] = {"status": "error", "message": str(e)}
     
     return results
+
+
+# Get Schedule Endpoint
+@app.get("/api/schedule")
+async def get_schedule():
+    """Get the current posting schedule."""
+    jobs = scheduler.get_jobs()
+    schedule_info = []
+    
+    for job in jobs:
+        schedule_info.append({
+            "id": job.id,
+            "next_run": job.next_run_time.isoformat() if job.next_run_time else None,
+            "trigger": str(job.trigger)
+        })
+    
+    return {
+        "total_jobs": len(jobs),
+        "scheduler_running": scheduler.running,
+        "schedule": schedule_info,
+        "weekly_posts": 28,
+        "posts_per_day": {
+            "Monday": 4,
+            "Tuesday": 3,
+            "Wednesday": 5,
+            "Thursday": 4,
+            "Friday": 5,
+            "Saturday": 4,
+            "Sunday": 3
+        }
+    }
+
+
+# Manual Post Trigger Endpoint
+@app.post("/api/trigger-post")
+async def trigger_post(background_tasks: BackgroundTasks):
+    """Manually trigger a post immediately (bypasses schedule)."""
+    background_tasks.add_task(scheduled_post)
+    return {
+        "success": True,
+        "message": "Post triggered and will be created in the background"
+    }
 
 
 # Error handlers
