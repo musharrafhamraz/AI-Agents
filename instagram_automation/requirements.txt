@@ -1,3 +1,7 @@
+# FastAPI Web Framework (for Render.com deployment)
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+
 # Core Framework
 langgraph>=0.0.40
 langchain>=0.1.0
@@ -25,7 +29,7 @@ aiohttp>=3.9.0
 
 # Image Processing
 Pillow>=10.0.0
-opencv-python>=4.8.0
+opencv-python-headless>=4.8.0
 
 # Scheduling
 APScheduler>=3.10.0

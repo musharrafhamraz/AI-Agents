@@ -1,0 +1,93 @@
+services:
+  # Instagram Automation Web Service
+  - type: web
+    name: instagram-automation
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      # Google Gemini API
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-1.5-pro
+      
+      # Image Generation
+      - key: IMAGE_PROVIDER
+        value: pollinations
+      - key: IMAGE_MODEL
+        value: gemini-2.5-flash-image
+      
+      # Instagram Graph API
+      - key: INSTAGRAM_ACCESS_TOKEN
+        sync: false
+      - key: INSTAGRAM_BUSINESS_ACCOUNT_ID
+        sync: false
+      - key: FACEBOOK_PAGE_ID
+        sync: false
+      
+      # Database (SQLite for free tier, upgrade to PostgreSQL for production)
+      - key: DATABASE_URL
+        value: sqlite:///./instagram_agent.db
+      
+      # Application Settings
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
+      - key: LOG_LEVEL
+        value: INFO
+      
+      # Content Settings
+      - key: BRAND_NAME
+        sync: false
+      - key: BRAND_VOICE
+        value: professional and friendly
+      - key: TARGET_AUDIENCE
+        value: young professionals aged 25-35
+      - key: DEFAULT_HASHTAG_COUNT
+        value: 15
+      
+      # Scheduling
+      - key: TIMEZONE
+        value: UTC
+      - key: DEFAULT_POSTING_TIMES
+        value: 09:00,13:00,18:00
+      
+      # Safety & Limits
+      - key: MAX_POSTS_PER_DAY
+        value: 3
+      - key: ENABLE_HUMAN_REVIEW
+        value: true
+      - key: AUTO_PUBLISH
+        value: false
+      
+      # Rate Limiting
+      - key: INSTAGRAM_API_RATE_LIMIT
+        value: 200
+      - key: API_RETRY_ATTEMPTS
+        value: 3
+      - key: API_RETRY_DELAY
+        value: 5
+      
+      # Port (Render provides this automatically)
+      - key: PORT
+        value: 10000
+
+  # Optional: Cron Job for Scheduled Posting
+  # Uncomment and configure if you want scheduled automated posts
+  # - type: cron
+  #   name: instagram-scheduled-posts
+  #   env: python
+  #   schedule: "0 9,13,18 * * *"  # Run at 9am, 1pm, 6pm UTC
+  #   buildCommand: pip install -r requirements.txt
+  #   startCommand: python -c "import asyncio; from src.agents import ContentCreatorAgent, ImageGeneratorAgent, PostingAgent; asyncio.run(create_and_post())"
+  #   envVars:
+  #     # Same environment variables as web service
+  #     - fromService:
+  #         type: web
+  #         name: instagram-automation
+  #         envVarKey: GOOGLE_API_KEY

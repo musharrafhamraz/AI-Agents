@@ -29,6 +29,21 @@ The system uses a **multi-agent architecture** with LangGraph orchestrating spec
 - Google AI API key (for both Text and Image generation)
 - Instagram Graph API access
 
+## 🚀 Deployment Options
+
+### Option 1: Deploy to Cloud (Render.com) ☁️
+
+Deploy to the cloud in 5 minutes! See **[RENDER_QUICKSTART.md](RENDER_QUICKSTART.md)** for step-by-step instructions.
+
+Benefits:
+- ✅ Accessible from anywhere via REST API
+- ✅ No local setup required
+- ✅ Free tier available
+- ✅ Auto-scaling and monitoring
+- ✅ HTTPS enabled by default
+
+### Option 2: Run Locally 💻
+
 ## 🚀 Quick Start
 
 ### 1. Clone and Setup
