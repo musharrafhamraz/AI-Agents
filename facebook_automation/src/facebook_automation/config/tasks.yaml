@@ -1,0 +1,45 @@
+ideation_task:
+  description: >
+    Identify 2 trending topics in {topic} for {target_audience}. Keep it brief.
+  expected_output: >
+    List 2 trending topics with one sentence each explaining why they matter.
+  agent: content_strategist
+
+drafting_task:
+  description: >
+    Write 1 Facebook post about {topic} for {target_audience}. Use {brand_voice}. 
+    Include hook, main message, and CTA. Add 3-5 hashtags. Keep under 200 words.
+  expected_output: >
+    One complete Facebook post with hook, message, CTA, and hashtags.
+  agent: creative_copywriter
+
+visualization_task:
+  description: >
+    Create an image for the post about {topic}. Use realistic style.
+    Return ONLY the image URL in format: IMAGE_URL: https://...
+  expected_output: >
+    IMAGE_URL: followed by the complete image URL
+  agent: visual_artist
+
+review_task:
+  description: >
+    Quick review: Is the post good for {target_audience}? Just say APPROVED or suggest one quick fix.
+  expected_output: >
+    APPROVED or one sentence with a fix needed.
+  agent: content_strategist
+
+publishing_task:
+  description: >
+    Publish the post with image to Facebook using FacebookPublishTool.
+    Extract the image URL from the visualization output (after "IMAGE_URL: ").
+    Pass the post text as 'message' and the extracted URL as 'image_url' to FacebookPublishTool.
+  expected_output: >
+    Post ID and link from Facebook.
+  agent: social_media_publisher
+
+analytics_task:
+  description: >
+    Get page insights using FacebookPageInsightsTool. Report key numbers only.
+  expected_output: >
+    Brief summary of fans, engagement, and one recommendation.
+  agent: community_analyst
