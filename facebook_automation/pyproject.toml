@@ -1,0 +1,27 @@
+[project]
+name = "facebook_automation"
+version = "0.1.0"
+description = "facebook_automation using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools,google-genai]==1.7.2",
+    "beautifulsoup4>=4.12.0",
+    "requests>=2.31.0",
+    "litellm>=1.75.3",
+]
+
+[project.scripts]
+facebook_automation = "facebook_automation.main:run"
+run_crew = "facebook_automation.main:run"
+train = "facebook_automation.main:train"
+replay = "facebook_automation.main:replay"
+test = "facebook_automation.main:test"
+run_with_trigger = "facebook_automation.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
