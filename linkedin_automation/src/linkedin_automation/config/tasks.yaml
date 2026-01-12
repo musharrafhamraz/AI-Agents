@@ -1,0 +1,47 @@
+industry_research_task:
+  description: >
+    Identify 2 trending professional topics in {industry} for {target_audience}. Keep it brief.
+  expected_output: >
+    List 2 trending topics with one sentence each explaining their professional relevance.
+  agent: content_strategist
+
+content_creation_task:
+  description: >
+    Write 1 professional LinkedIn post about {industry} for {target_audience}. Use {tone}.
+    Include compelling hook, valuable insights, and professional CTA. Add 3-5 industry hashtags.
+    Length: 200-300 words. Focus on thought leadership and value.
+  expected_output: >
+    One complete professional LinkedIn post with hook, insights, CTA, and hashtags.
+  agent: professional_writer
+
+visual_design_task:
+  description: >
+    Create a professional corporate image for the post about {industry}. Use clean, modern style.
+    Return ONLY the image URL in format: IMAGE_URL: https://...
+  expected_output: >
+    IMAGE_URL: followed by the complete image URL
+  agent: visual_designer
+
+content_review_task:
+  description: >
+    Quick review: Is the post professional and suitable for {target_audience}? 
+    Just say APPROVED or suggest one quick fix.
+  expected_output: >
+    APPROVED or one sentence with a fix needed.
+  agent: content_strategist
+
+publishing_task:
+  description: >
+    Publish the post with image to LinkedIn using LinkedInPublishTool.
+    Extract the image URL from the visual design output (after "IMAGE_URL: ").
+    Pass the post text as 'text' and the extracted URL as 'image_url' to LinkedInPublishTool.
+  expected_output: >
+    Post ID from LinkedIn.
+  agent: linkedin_publisher
+
+analytics_task:
+  description: >
+    Get LinkedIn analytics using LinkedInAnalyticsTool. Report key numbers only.
+  expected_output: >
+    Brief summary of profile info and one recommendation for improvement.
+  agent: engagement_analyst
