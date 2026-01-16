@@ -4,18 +4,39 @@ An autonomous Facebook Page management system built with CrewAI. This crew of sp
 
 ## 🚀 Features
 
+- **Automated Scheduling**: Posts 3-4 times daily (24 posts/week) automatically
 - **Content Strategist**: Coordinates the pipeline and ensures brand consistency
 - **Creative Copywriter**: Generates engaging, trend-aware post variations with hashtags
 - **Visual Artist**: Creates eye-catching images using AI (Pollinations.ai)
 - **Social Media Publisher**: Handles Facebook Graph API publishing
 - **Community Analyst**: Analyzes insights and provides recommendations
 - **Powered by Groq Llama 3.3**: Ultra-fast model with no quota issues (14,400 requests/day)
+- **REST API**: FastAPI endpoints for integration and monitoring
+- **Docker Ready**: Deploy to Hugging Face Spaces in minutes
 
 ## 📋 Prerequisites
 
 - Python 3.10 - 3.13
 - Facebook Page with admin access
 - Groq API key (free, fast, generous quotas)
+
+## 🌐 Deployment Options
+
+### Option 1: Hugging Face Spaces (Recommended) ☁️
+
+Deploy to the cloud in 5 minutes! See **[HUGGINGFACE_DEPLOYMENT.md](HUGGINGFACE_DEPLOYMENT.md)** for step-by-step instructions.
+
+Benefits:
+- ✅ Accessible from anywhere via REST API
+- ✅ Automatic posting 24 times per week
+- ✅ No local setup required
+- ✅ Free tier available
+- ✅ Auto-scaling and monitoring
+- ✅ HTTPS enabled by default
+
+### Option 2: Run Locally 💻
+
+Run on your own computer or server with automatic posting.
 
 ## 🛠️ Installation
 
@@ -78,7 +99,19 @@ See [GROQ_SETUP.md](GROQ_SETUP.md) for detailed instructions.
 
 ## 🎯 Usage
 
-### Run the Crew
+### Option A: Run with Scheduler (Automatic Posting)
+
+```bash
+# Start the API server with integrated scheduler
+python app.py
+
+# Or use the batch file
+start_api.bat
+```
+
+The scheduler will automatically post 3-4 times per day!
+
+### Option B: Run Once (Manual)
 
 ```bash
 crewai run
@@ -196,11 +229,42 @@ The crew generates:
 - `facebook_analytics_report.md` - Performance analytics report
 - Console logs showing the entire workflow
 
+## 📅 Automatic Posting Schedule
+
+When running with the scheduler, posts are automatically created and published:
+
+| Day | Posts | Times (UTC) |
+|-----|-------|-------------|
+| Monday | 4 | 09:00, 13:00, 17:00, 20:00 |
+| Tuesday | 3 | 10:00, 14:00, 19:00 |
+| Wednesday | 4 | 08:00, 11:00, 14:00, 17:00 |
+| Thursday | 3 | 09:30, 13:30, 16:30 |
+| Friday | 4 | 08:30, 11:30, 14:30, 18:00 |
+| Saturday | 3 | 10:00, 14:00, 18:00 |
+| Sunday | 3 | 11:00, 16:00, 20:00 |
+
+**Total: 24 posts per week**
+
+See **[SCHEDULER_GUIDE.md](SCHEDULER_GUIDE.md)** for details.
+
+## 📡 API Endpoints
+
+When running with `app.py`, you get these REST API endpoints:
+
+- `GET /` - API information
+- `GET /health` - Health check and scheduler status
+- `GET /api/schedule` - View posting schedule
+- `POST /api/trigger-post` - Manually trigger a post
+- `POST /api/create-post` - Create custom post
+- `GET /docs` - Interactive API documentation
+
 ## 🚀 Future Enhancements
 
+- [x] Scheduled posting at optimal times ✅
+- [x] REST API for integration ✅
+- [x] Docker deployment ✅
 - [ ] Human-in-the-loop review before publishing
 - [ ] Memory/history for agents to learn from past posts
-- [ ] Scheduled posting at optimal times
 - [ ] Multi-language support
 - [ ] A/B testing different post variations
 - [ ] Integration with analytics dashboards

@@ -1,0 +1,45 @@
+---
+title: Facebook Automation
+emoji: 🤖
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+license: mit
+---
+
+# Facebook Automation with AI Scheduler
+
+Automated Facebook posting with AI-powered content generation. Posts 3-4 times daily with rotating themes.
+
+## Features
+
+- 🤖 AI-powered content generation using Groq Llama 3.3
+- 📅 Automatic posting 24 times per week (3-4 posts/day)
+- 🎨 AI-generated images with Pollinations.ai
+- 📊 Built-in analytics and insights
+- 🔄 15 rotating content themes
+- 🚀 FastAPI REST API
+- 📡 Real-time monitoring
+
+## Quick Start
+
+1. Set environment variables in Space settings:
+   - `GROQ_API_KEY`
+   - `FACEBOOK_PAGE_ACCESS_TOKEN`
+   - `FACEBOOK_PAGE_ID`
+
+2. Deploy and it starts automatically!
+
+## API Endpoints
+
+- `GET /` - API information
+- `GET /health` - Health check
+- `GET /api/schedule` - View posting schedule
+- `POST /api/trigger-post` - Manual post trigger
+- `POST /api/create-post` - Create custom post
+- `GET /docs` - Interactive API documentation
+
+## Documentation
+
+See `README_DEPLOYMENT.md` for full setup instructions.

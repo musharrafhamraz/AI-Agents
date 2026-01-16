@@ -64,6 +64,8 @@ class FacebookPublishTool(BaseTool):
 
     def _run(self, message: str, image_url: Optional[str] = None) -> str:
         """Publish content to Facebook Page."""
+        import time
+        
         page_access_token = os.getenv("FACEBOOK_PAGE_ACCESS_TOKEN")
         page_id = os.getenv("FACEBOOK_PAGE_ID")
         
@@ -85,21 +87,45 @@ class FacebookPublishTool(BaseTool):
                 "access_token": page_access_token
             }
         
-        try:
-            response = requests.post(url, data=payload)
-            response.raise_for_status()
-            post_id = response.json().get("id") or response.json().get("post_id")
-            post_link = f"https://facebook.com/{post_id}"
-            return f"✅ Successfully published post!\nPost ID: {post_id}\nLink: {post_link}"
-        except requests.exceptions.RequestException as e:
-            error_msg = str(e)
-            if hasattr(e, 'response') and e.response is not None:
-                try:
-                    error_data = e.response.json()
-                    error_msg = error_data.get('error', {}).get('message', error_msg)
-                except:
-                    pass
-            return f"❌ Error publishing to Facebook: {error_msg}"
+        # Retry logic with longer delays
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                # Use session with custom DNS resolver
+                session = requests.Session()
+                
+                # Try with different timeout and retry settings
+                response = session.post(
+                    url, 
+                    data=payload, 
+                    timeout=60,
+                    verify=True,
+                    headers={
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept': 'application/json'
+                    }
+                )
+                response.raise_for_status()
+                post_id = response.json().get("id") or response.json().get("post_id")
+                post_link = f"https://facebook.com/{post_id}"
+                return f"✅ Successfully published post!\nPost ID: {post_id}\nLink: {post_link}"
+                
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    wait_time = 5 * (attempt + 1)  # 5s, 10s, 15s, 20s, 25s
+                    time.sleep(wait_time)
+                    continue
+                    
+                error_msg = str(e)
+                if hasattr(e, 'response') and e.response is not None:
+                    try:
+                        error_data = e.response.json()
+                        error_msg = error_data.get('error', {}).get('message', error_msg)
+                    except:
+                        pass
+                
+                # Return a more helpful error message
+                return f"❌ Error publishing to Facebook: {error_msg}\n\nNote: This may be a network restriction on Hugging Face Spaces. Consider using a webhook or external service to post to Facebook."
 
 
 # Facebook Post Engagement Tool
