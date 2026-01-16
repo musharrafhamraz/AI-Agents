@@ -67,6 +67,10 @@ class LinkedInPublishTool(BaseTool):
     def _download_image(self, image_url: str) -> Optional[bytes]:
         """Download image from URL."""
         try:
+            # Strip "IMAGE_URL: " prefix if present
+            if image_url.startswith("IMAGE_URL:"):
+                image_url = image_url.replace("IMAGE_URL:", "").strip()
+            
             # Add timeout and retry logic for Pollinations.ai
             max_retries = 3
             for attempt in range(max_retries):
@@ -87,10 +91,23 @@ class LinkedInPublishTool(BaseTool):
     def _run(self, text: str, image_url: Optional[str] = None) -> str:
         """Publish content to LinkedIn."""
         access_token = os.getenv("LINKEDIN_ACCESS_TOKEN")
-        author_urn = os.getenv("LINKEDIN_PERSON_URN") or os.getenv("LINKEDIN_ORGANIZATION_URN")
+        person_urn = os.getenv("LINKEDIN_PERSON_URN")
+        org_urn = os.getenv("LINKEDIN_ORGANIZATION_URN")
         
-        if not access_token or not author_urn:
-            return "Error: Missing LinkedIn credentials in environment variables"
+        # Determine author URN - person takes precedence
+        if person_urn:
+            author_urn = person_urn
+            author_type = "person"
+        elif org_urn:
+            author_urn = org_urn
+            author_type = "organization"
+        else:
+            return "Error: Missing LinkedIn URN (LINKEDIN_PERSON_URN or LINKEDIN_ORGANIZATION_URN) in environment variables"
+        
+        if not access_token:
+            return "Error: Missing LinkedIn access token in environment variables"
+        
+        print(f"Publishing to {author_type}: {author_urn}")
         
         # Handle image upload if provided
         asset_urn = None
@@ -181,7 +198,28 @@ class LinkedInPublishTool(BaseTool):
             if hasattr(e, 'response') and e.response is not None:
                 try:
                     error_data = e.response.json()
-                    error_msg = f"{error_data.get('message', error_msg)} - {error_data.get('serviceErrorCode', '')}"
+                    error_msg = f"{error_data.get('message', error_msg)}"
+                    service_error = error_data.get('serviceErrorCode', '')
+                    if service_error:
+                        error_msg += f" (Error Code: {service_error})"
+                    
+                    # Provide specific guidance for common errors
+                    if e.response.status_code == 403:
+                        if author_type == "organization":
+                            error_msg += "\n\n⚠️ TROUBLESHOOTING FOR ORGANIZATION POSTS:"
+                            error_msg += "\n1. Make sure your access token has 'w_organization_social' scope"
+                            error_msg += "\n2. Verify you are an ADMIN of the organization page"
+                            error_msg += "\n3. Regenerate your token using: python manual_auth.py"
+                            error_msg += f"\n4. Verify organization URN is correct: {author_urn}"
+                        else:
+                            error_msg += "\n\n⚠️ Token may not have 'w_member_social' permission"
+                    elif e.response.status_code == 400 and "author" in error_msg.lower():
+                        error_msg += "\n\n⚠️ AUTHOR FIELD ERROR:"
+                        error_msg += f"\n1. Check if URN format is correct: {author_urn}"
+                        if author_type == "organization":
+                            error_msg += "\n2. Verify you have admin access to this organization"
+                            error_msg += "\n3. Token must have 'w_organization_social' scope"
+                            error_msg += "\n4. Run: python manual_auth.py to get a new token"
                 except:
                     error_msg = e.response.text if e.response.text else error_msg
             return f"❌ Error publishing to LinkedIn: {error_msg}"
