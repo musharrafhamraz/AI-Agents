@@ -1,0 +1,135 @@
+{
+  "servers": {
+    "memory": {
+      "host": "localhost",
+      "port": 5002,
+      "protocol": "http",
+      "enabled": true,
+      "tools": [
+        "store_memory",
+        "search_memories",
+        "get_account_context",
+        "update_memory",
+        "delete_memory",
+        "get_memory"
+      ],
+      "resources": [
+        "memory://{account_id}",
+        "context://{account_id}"
+      ]
+    },
+    "survey": {
+      "host": "localhost",
+      "port": 5001,
+      "protocol": "http",
+      "enabled": true,
+      "tools": [
+        "create_survey",
+        "get_survey",
+        "list_templates",
+        "add_question",
+        "update_question",
+        "update_survey",
+        "delete_survey",
+        "list_surveys"
+      ],
+      "resources": [
+        "survey://{survey_id}",
+        "templates://"
+      ]
+    },
+    "validation": {
+      "host": "localhost",
+      "port": 5003,
+      "protocol": "http",
+      "enabled": true,
+      "tools": [
+        "validate_response",
+        "validate_layer",
+        "get_validation_status",
+        "challenge_response"
+      ],
+      "resources": [
+        "validation://{response_id}",
+        "layers://"
+      ],
+      "layers": [
+        {
+          "layer": 1,
+          "name": "Syntax Layer",
+          "description": "Validates response format and structure"
+        },
+        {
+          "layer": 2,
+          "name": "Semantic Layer",
+          "description": "Checks response meaning and coherence"
+        },
+        {
+          "layer": 3,
+          "name": "Consistency Layer",
+          "description": "Ensures internal consistency"
+        },
+        {
+          "layer": 4,
+          "name": "Context Layer",
+          "description": "Validates against survey context and memory"
+        },
+        {
+          "layer": 5,
+          "name": "Adversarial Layer",
+          "description": "Challenges response with counter-arguments"
+        },
+        {
+          "layer": 6,
+          "name": "Hallucination Layer",
+          "description": "Detects fabricated or unsupported claims"
+        },
+        {
+          "layer": 7,
+          "name": "Confidence Layer",
+          "description": "Assigns overall confidence score"
+        }
+      ]
+    },
+    "analytics": {
+      "host": "localhost",
+      "port": 5004,
+      "protocol": "http",
+      "enabled": true,
+      "tools": [
+        "generate_insights",
+        "aggregate_responses",
+        "detect_patterns",
+        "get_insight_trace",
+        "get_insights"
+      ],
+      "resources": [
+        "insights://{survey_id}",
+        "patterns://{survey_id}"
+      ]
+    }
+  },
+  "orchestrators": {
+    "validation": {
+      "enabled": true,
+      "max_retries": 3,
+      "retry_delay": 1.0,
+      "checkpoint_enabled": true
+    },
+    "survey_creator": {
+      "enabled": true,
+      "max_retries": 2,
+      "checkpoint_enabled": true
+    },
+    "analytics": {
+      "enabled": true,
+      "max_retries": 2,
+      "checkpoint_enabled": true
+    }
+  },
+  "settings": {
+    "timeout": 30,
+    "max_concurrent_requests": 10,
+    "log_level": "INFO"
+  }
+}

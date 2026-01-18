@@ -1,0 +1,87 @@
+# Database Configuration
+
+development:
+  postgresql:
+    host: localhost
+    port: 5432
+    database: validata
+    user: validata
+    password: validata_dev_password
+    pool_size: 20
+    max_overflow: 10
+    echo: true
+  
+  redis:
+    host: localhost
+    port: 6379
+    db: 0
+    password: null
+    max_connections: 50
+  
+  vector_db:
+    provider: pinecone
+    index_name: validata-memory
+    dimension: 1536
+    metric: cosine
+
+staging:
+  postgresql:
+    host: ${DB_HOST}
+    port: 5432
+    database: validata_staging
+    user: ${DB_USER}
+    password: ${DB_PASSWORD}
+    pool_size: 30
+    max_overflow: 20
+    echo: false
+  
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
+    db: 0
+    password: ${REDIS_PASSWORD}
+    max_connections: 100
+  
+  vector_db:
+    provider: pinecone
+    index_name: validata-staging
+    dimension: 1536
+    metric: cosine
+
+production:
+  postgresql:
+    host: ${DB_HOST}
+    port: 5432
+    database: validata_prod
+    user: ${DB_USER}
+    password: ${DB_PASSWORD}
+    pool_size: 50
+    max_overflow: 30
+    echo: false
+    ssl_mode: require
+  
+  redis:
+    host: ${REDIS_HOST}
+    port: 6379
+    db: 0
+    password: ${REDIS_PASSWORD}
+    max_connections: 200
+    ssl: true
+  
+  vector_db:
+    provider: pinecone
+    index_name: validata-prod
+    dimension: 1536
+    metric: cosine
+
+# Migration settings
+migrations:
+  directory: backend/database/migrations
+  table_name: alembic_version
+  
+# Backup settings
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention_days: 30
+  s3_bucket: ${BACKUP_S3_BUCKET}
