@@ -1,22 +1,35 @@
 industry_research_task:
   description: >
-    Identify 2 trending professional topics in {industry} for {target_audience}. Keep it brief.
+    Identify 1 trending professional topic in {industry} for {target_audience}.
+    For this topic, find 3-5 specific data points, statistics, or key facts that can be visualized in an infographic.
+    Structure the information hierarchically: main message, supporting data points with numbers, and context.
+    Include a compelling title for the infographic and specify what visual elements would work best (charts, icons, comparisons).
   expected_output: >
-    List 2 trending topics with one sentence each explaining their professional relevance.
+    Topic title, main message, and 3-5 specific data points with numbers/statistics that can be visualized in an infographic.
+    Include suggestions for visual elements (bar charts, statistics, icons, etc.).
   agent: content_strategist
 
 content_creation_task:
   description: >
     Write 1 professional LinkedIn post about {industry} for {target_audience}. Use {tone}.
-    Include compelling hook, valuable insights, and professional CTA. Add 3-5 industry hashtags.
-    Length: 200-300 words. Focus on thought leadership and value.
+    Reference the key data points and statistics from the research that will appear in the infographic.
+    Structure: Start with a compelling hook about the data, provide context for the statistics,
+    and include a clear call-to-action directing attention to the infographic visual (e.g., "See the data below", "Check out the infographic").
+    Add 3-5 hashtags including both industry-specific tags and data visualization tags (like #infographic, #data, #dataviz, or #statistics).
+    Length: 200-300 words. Make the post complement the visual data without duplicating all information.
   expected_output: >
-    One complete professional LinkedIn post with hook, insights, CTA, and hashtags.
+    One complete professional LinkedIn post that references the infographic data, provides context,
+    and directs attention to the visual with appropriate hashtags.
   agent: professional_writer
 
 visual_design_task:
   description: >
-    Create a professional corporate image for the post about {industry}. Use clean, modern style.
+    Create a professional infographic that visualizes the data points from the research about {industry}.
+    Design specifications: Include a compelling title, 3-5 key statistics/data points prominently displayed,
+    icons or charts to represent the data, and a clean organized layout.
+    Specify the infographic type (statistical, comparison, timeline, or process) based on the content.
+    Use modern professional style with high contrast, bold typography, and white background for readability.
+    Ensure the design is optimized for LinkedIn (1200x627px) with clear visual hierarchy.
     Return ONLY the image URL in format: IMAGE_URL: https://...
   expected_output: >
     IMAGE_URL: followed by the complete image URL
