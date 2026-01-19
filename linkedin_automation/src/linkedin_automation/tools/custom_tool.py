@@ -343,28 +343,212 @@ class LinkedInEngagementTool(BaseTool):
 class ImageGenerationInput(BaseModel):
     """Input schema for ImageGenerationTool."""
     prompt: str = Field(..., description="Description of the image to generate")
-    style: Optional[str] = Field("professional", description="Style of the image")
+    style: Optional[str] = Field("infographic", description="Style of the image (infographic, professional, corporate)")
 
 
 class ImageGenerationTool(BaseTool):
     name: str = "Image Generation Tool"
-    description: str = "Generates professional images using Pollinations.ai API based on text prompts"
+    description: str = "Generates professional infographics and images using Gemini API (primary) or Pollinations.ai (fallback) based on text prompts"
     args_schema: Type[BaseModel] = ImageGenerationInput
 
-    def _run(self, prompt: str, style: str = "professional") -> str:
-        """Generate a professional image using Pollinations.ai."""
+    def _clean_prompt(self, prompt: str) -> str:
+        """Clean prompt text for URL encoding."""
+        # Remove special characters that break URLs
+        cleaned = prompt.replace("#", "").replace("&", "and").replace("%", "percent")
+        # Normalize whitespace
+        cleaned = " ".join(cleaned.split())
+        return cleaned
+
+    def _get_infographic_type_keywords(self, prompt: str) -> str:
+        """Extract infographic type-specific keywords from prompt."""
+        prompt_lower = prompt.lower()
+        
+        # Detect infographic type from prompt content
+        if any(word in prompt_lower for word in ['timeline', 'chronological', 'history', 'evolution', 'over time']):
+            return "timeline chronological events milestones sequential progression"
+        elif any(word in prompt_lower for word in ['comparison', 'versus', 'vs', 'compare', 'difference']):
+            return "side-by-side comparison contrast two columns versus"
+        elif any(word in prompt_lower for word in ['process', 'steps', 'workflow', 'how to', 'procedure']):
+            return "sequential steps process workflow numbered stages"
+        else:
+            # Default to statistical
+            return "statistics data points key metrics numbers percentages"
+
+    def _generate_with_gemini(self, prompt: str) -> Optional[str]:
+        """Generate image using Google Gemini API."""
         try:
-            # Add professional context to prompt
-            professional_prompt = f"professional corporate business {prompt} clean modern design"
+            import google.generativeai as genai
+            
+            # Get API key and model from environment
+            api_key = os.getenv("GEMINI_API_KEY")
+            model_name = os.getenv("GEMINI_MODEL_NAME", "imagen-3.0-generate-001")
+            
+            if not api_key:
+                print("⚠️ GEMINI_API_KEY not found in environment variables")
+                return None
+            
+            # Configure Gemini
+            genai.configure(api_key=api_key)
+            
+            print(f"🎨 Attempting to generate image with Gemini ({model_name})...")
+            
+            # Generate image using Gemini
+            model = genai.ImageGenerationModel(model_name)
+            result = model.generate_images(
+                prompt=prompt,
+                number_of_images=1,
+                aspect_ratio="16:9",  # LinkedIn optimal ratio
+                safety_filter_level="block_only_high",
+                person_generation="allow_adult"
+            )
+            
+            if result.images and len(result.images) > 0:
+                # Save image temporarily and upload to a hosting service
+                # For now, we'll use the image data URL directly
+                image = result.images[0]
+                
+                # Convert PIL Image to bytes
+                import io
+                from PIL import Image
+                img_byte_arr = io.BytesIO()
+                
+                # Convert to RGB if necessary
+                if image.mode in ('RGBA', 'LA', 'P'):
+                    image = image.convert('RGB')
+                
+                image.save(img_byte_arr, format='JPEG', quality=95)
+                img_byte_arr.seek(0)
+                
+                # Upload to temporary hosting (using imgbb or similar)
+                # For now, return a base64 data URL
+                import base64
+                img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode()
+                
+                # Note: LinkedIn API requires a publicly accessible URL
+                # We need to upload this to a temporary hosting service
+                print("✅ Image generated with Gemini successfully!")
+                print("⚠️ Note: Image needs to be uploaded to public hosting for LinkedIn")
+                
+                # Try to upload to imgbb if API key is available
+                imgbb_key = os.getenv("IMGBB_API_KEY")
+                if imgbb_key:
+                    upload_url = self._upload_to_imgbb(img_base64, imgbb_key)
+                    if upload_url:
+                        return upload_url
+                
+                # If imgbb upload fails, return base64 (won't work with LinkedIn but better than nothing)
+                return f"data:image/jpeg;base64,{img_base64}"
+            
+            print("⚠️ Gemini returned no images")
+            return None
+            
+        except ImportError:
+            print("⚠️ google-generativeai package not installed. Install with: pip install google-generativeai")
+            return None
+        except Exception as e:
+            print(f"⚠️ Gemini generation failed: {str(e)}")
+            return None
+
+    def _upload_to_imgbb(self, img_base64: str, api_key: str) -> Optional[str]:
+        """Upload base64 image to imgbb for public hosting."""
+        try:
+            url = "https://api.imgbb.com/1/upload"
+            payload = {
+                "key": api_key,
+                "image": img_base64,
+                "expiration": 600  # 10 minutes expiration
+            }
+            
+            response = requests.post(url, data=payload, timeout=30)
+            response.raise_for_status()
+            
+            data = response.json()
+            if data.get("success"):
+                image_url = data.get("data", {}).get("url")
+                print(f"✅ Image uploaded to imgbb: {image_url}")
+                return image_url
+            
+            return None
+        except Exception as e:
+            print(f"⚠️ Failed to upload to imgbb: {str(e)}")
+            return None
+
+    def _generate_with_pollinations(self, prompt: str) -> str:
+        """Generate image using Pollinations.ai as fallback."""
+        try:
+            print("🎨 Falling back to Pollinations.ai...")
             
             # Clean and encode the prompt
-            clean_prompt = professional_prompt.strip()
-            encoded_prompt = clean_prompt.replace(" ", "%20")
+            clean_prompt = self._clean_prompt(prompt)
+            
+            # Use urllib.parse for proper URL encoding
+            import urllib.parse
+            encoded_prompt = urllib.parse.quote(clean_prompt)
             
             # Pollinations.ai free API endpoint with dimensions for LinkedIn
-            url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1200&height=627"
+            url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1200&height=627&nologo=true"
             
-            # Return URL in a clear format for the agent to extract
-            return f"IMAGE_URL: {url}"
+            print(f"✅ Pollinations.ai URL generated: {url}")
+            return url
+            
         except Exception as e:
-            return f"Error generating image: {str(e)}"
+            raise Exception(f"Pollinations.ai generation failed: {str(e)}")
+
+    def _run(self, prompt: str, style: str = "infographic") -> str:
+        """Generate a professional infographic or image using Gemini (primary) or Pollinations.ai (fallback)."""
+        try:
+            # Construct infographic-specific prompt
+            if style == "infographic" or "infographic" in prompt.lower():
+                # Get type-specific keywords
+                type_keywords = self._get_infographic_type_keywords(prompt)
+                
+                # Quality and readability specifications
+                quality_specs = (
+                    "high contrast clean uncluttered white space "
+                    "professional blue gray colors readable text "
+                    "bold headers clear visual hierarchy organized sections"
+                )
+                
+                # Infographic-specific keywords and layout
+                enhanced_prompt = (
+                    f"professional infographic data visualization {prompt} "
+                    f"{type_keywords} "
+                    f"clean modern layout bold typography "
+                    f"business style white background "
+                    f"{quality_specs}"
+                )
+            elif style == "corporate":
+                enhanced_prompt = f"professional corporate business {prompt} clean modern design"
+            else:
+                enhanced_prompt = (
+                    f"professional {style} {prompt} "
+                    f"clean modern design high contrast organized layout"
+                )
+            
+            # Try Gemini first
+            print("=" * 60)
+            print("🚀 Starting image generation process...")
+            print(f"📝 Prompt: {enhanced_prompt[:100]}...")
+            print("=" * 60)
+            
+            gemini_url = self._generate_with_gemini(enhanced_prompt)
+            
+            if gemini_url:
+                # Check if it's a valid URL (not base64)
+                if gemini_url.startswith("http"):
+                    return f"IMAGE_URL: {gemini_url}"
+                else:
+                    print("⚠️ Gemini returned base64 data, not a public URL. Falling back to Pollinations...")
+            
+            # Fallback to Pollinations
+            print("-" * 60)
+            print("🔄 Switching to Pollinations.ai fallback...")
+            print("-" * 60)
+            
+            pollinations_url = self._generate_with_pollinations(enhanced_prompt)
+            return f"IMAGE_URL: {pollinations_url}"
+            
+        except Exception as e:
+            error_msg = f"❌ Error generating image: {str(e)}"
+            fallback_msg = "Consider using a generic image or posting text-only."
+            return f"{error_msg}\n{fallback_msg}"
