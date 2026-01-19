@@ -8,7 +8,9 @@ dependencies = [
     "crewai[tools]==1.7.2",
     "requests>=2.31.0",
     "python-dotenv>=1.0.0",
-    "litellm>=1.0.0"
+    "litellm>=1.0.0",
+    "google-generativeai>=0.3.0",
+    "pillow>=10.0.0"
 ]
 
 [project.scripts]
