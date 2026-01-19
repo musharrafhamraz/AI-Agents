@@ -18,9 +18,12 @@ def run():
     Run the crew.
     """
     inputs = {
-        'industry': 'Technology and Innovation',
-        'target_audience': 'tech professionals and business leaders',
-        'tone': 'professional and insightful'
+        'industry': 'Artificial Intelligence and Machine Learning',
+        'target_audience': 'AI engineers, data scientists, and tech leaders',
+        'tone': 'technical yet accessible and insightful',
+        'infographic_type': 'process',  # Options: statistical, comparison, timeline, process
+        'color_scheme': 'blue and purple',    # Optional: professional color preferences
+        'data_focus': 'RAG system architecture and workflow'          # Optional: statistics, trends, comparisons
     }
 
     try:
