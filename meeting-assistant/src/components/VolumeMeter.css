@@ -1,0 +1,64 @@
+.volume-meter {
+    display: flex;
+    gap: 2px;
+}
+
+.volume-meter.horizontal {
+    flex-direction: row;
+    align-items: center;
+}
+
+.volume-meter.vertical {
+    flex-direction: column-reverse;
+    align-items: center;
+}
+
+/* Size variants */
+.volume-meter.sm .volume-bar {
+    width: 4px;
+    height: 12px;
+}
+
+.volume-meter.md .volume-bar {
+    width: 4px;
+    height: 20px;
+}
+
+.volume-meter.lg .volume-bar {
+    width: 6px;
+    height: 28px;
+}
+
+.volume-meter.vertical .volume-bar {
+    width: 20px;
+    height: 4px;
+}
+
+/* Bar styling */
+.volume-bar {
+    border-radius: 2px;
+    background: var(--color-border);
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.volume-meter:not(.active) .volume-bar {
+    opacity: 0.5;
+}
+
+.volume-bar.lit.low {
+    background: var(--color-accent-success);
+}
+
+.volume-bar.lit.medium {
+    background: var(--color-accent-warning);
+}
+
+.volume-bar.lit.high {
+    background: var(--color-accent-error);
+}
+
+/* Waveform */
+.waveform-canvas {
+    display: block;
+    border-radius: var(--radius-md);
+}

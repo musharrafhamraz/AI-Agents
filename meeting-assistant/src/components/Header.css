@@ -1,0 +1,97 @@
+.header {
+    height: var(--header-height);
+    padding: 0 var(--space-4);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.header-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.recording-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-full);
+}
+
+.recording-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent-error);
+    animation: recording-pulse 1.5s ease-in-out infinite;
+}
+
+.recording-time {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    font-family: var(--font-mono);
+    color: var(--color-accent-error);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.theme-toggle:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+}
+
+.theme-icon {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+.theme-icon.light {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+.theme-icon.dark {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+[data-theme="light"] .theme-icon.light {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+[data-theme="light"] .theme-icon.dark {
+    opacity: 0;
+    transform: rotate(-90deg);
+}
