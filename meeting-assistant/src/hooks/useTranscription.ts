@@ -9,6 +9,7 @@ import {
     noteGenerationService,
     audioCapture
 } from '@/services';
+import type { TranscriptionResult } from '@/services';
 import { useTranscriptStore } from '@/store';
 import type { TranscriptEntry } from '@/types';
 
@@ -33,11 +34,13 @@ export function useTranscription(): UseTranscriptionReturn {
             try {
                 const settings = JSON.parse(savedSettings);
 
-                // Configure transcription service
+                // Configure transcription service (Rev.ai)
                 if (settings.apiKeys?.openaiKey) {
                     transcriptionService.configure({
                         apiKey: settings.apiKeys.openaiKey,
                         language: settings.transcriptionLanguage || undefined,
+                        skipDiarization: false, // Enable Rev.ai's built-in diarization
+                        diarizationType: 'standard',
                     });
                 }
 
@@ -82,8 +85,34 @@ export function useTranscription(): UseTranscriptionReturn {
     }, []);
 
     // Handle transcription results with speaker diarization
-    const handleTranscriptionResult = useCallback(async (result: { text: string; timestamp: number }) => {
-        // Analyze audio features for speaker identification
+    const handleTranscriptionResult = useCallback(async (result: TranscriptionResult) => {
+        // If Rev.ai provided speaker info, use it directly
+        if (result.speakerId && result.speakerName) {
+            const entry: TranscriptEntry = {
+                id: crypto.randomUUID(),
+                meetingId: '', // Will be set by the meeting context
+                speakerId: result.speakerId,
+                speakerName: result.speakerName,
+                text: result.text,
+                timestamp: result.timestamp,
+                endTimestamp: result.timestamp + 1000,
+                confidence: result.confidence || 1.0,
+                language: result.language || 'en',
+                createdAt: new Date(),
+            };
+
+            addEntry(entry);
+            noteGenerationService.addTranscriptEntry(entry);
+
+            // Update transcript context for AI
+            transcriptRef.current += `\n[${new Date(result.timestamp).toLocaleTimeString()}] ${entry.speakerName}: ${result.text}`;
+            aiChatService.updateTranscriptContext(transcriptRef.current);
+
+            setIsProcessing(false);
+            return;
+        }
+
+        // Fallback: Use simple speaker diarization for OpenAI Whisper
         const audioFeatures = audioChunkBuffer.current.length > 0
             ? speakerDiarizationService.analyzeAudioFeatures(
                   audioChunkBuffer.current[audioChunkBuffer.current.length - 1],
@@ -100,8 +129,8 @@ export function useTranscription(): UseTranscriptionReturn {
             text: result.text,
             timestamp: result.timestamp,
             endTimestamp: result.timestamp + 1000,
-            confidence: 1.0,
-            language: 'en',
+            confidence: result.confidence || 1.0,
+            language: result.language || 'en',
             createdAt: new Date(),
         };
 
@@ -131,7 +160,7 @@ export function useTranscription(): UseTranscriptionReturn {
     // Start transcription
     const startTranscription = useCallback(() => {
         if (!transcriptionService.isConfigured()) {
-            console.warn('Transcription service not configured. Please add your OpenAI API key in Settings.');
+            console.warn('Transcription service not configured. Please add your Rev.ai API key in Settings.');
             return;
         }
 
