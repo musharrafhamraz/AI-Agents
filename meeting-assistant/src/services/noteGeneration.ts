@@ -3,6 +3,7 @@
 
 import type { Note, NoteType, TranscriptEntry } from '@/types';
 import { aiChatService } from './aiChat';
+import { integrationService } from './integrations';
 
 export interface NoteGenerationConfig {
     enabled: boolean;
@@ -123,6 +124,13 @@ class NoteGenerationService {
             // Emit generated notes
             notes.forEach(note => {
                 this.callbacks.forEach(cb => cb(note));
+                
+                // Auto-sync to integrations if enabled
+                if (integrationService.isEnabled()) {
+                    this.syncNoteToIntegrations(note).catch(err => {
+                        console.error('Failed to sync note to integrations:', err);
+                    });
+                }
             });
 
             // Update last processed index
@@ -320,6 +328,28 @@ Return format: ["follow-up 1", "follow-up 2", ...]`,
         this.transcriptBuffer = [];
         this.lastProcessedIndex = 0;
         console.log('Note generation service reset');
+    }
+
+    /**
+     * Sync note to external integrations
+     */
+    private async syncNoteToIntegrations(note: Note): Promise<void> {
+        try {
+            // Get meeting title from somewhere (you might need to pass this)
+            const meetingTitle = 'Current Meeting'; // TODO: Get actual meeting title
+            
+            const results = await integrationService.syncNote(note, meetingTitle);
+            
+            results.forEach(result => {
+                if (result.success) {
+                    console.log(`✅ Synced to ${result.platform}: ${note.content.substring(0, 50)}...`);
+                } else {
+                    console.warn(`❌ Failed to sync to ${result.platform}: ${result.error}`);
+                }
+            });
+        } catch (error) {
+            console.error('Integration sync error:', error);
+        }
     }
 }
 
