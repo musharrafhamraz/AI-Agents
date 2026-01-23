@@ -1,0 +1,112 @@
+﻿cargo :     Checking meeting-assistant 
+v0.1.0 (C:\Users\PMLS\Desktop\instagram_posti
+ng_agent\meeting-assistant\src-tauri)
+At line:1 char:1
++ cargo check 2>&1 | Out-File -FilePath 
+errors.txt -Encoding utf8
++ ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified:  
+   (    Checking me...tant\src-tauri):Strin  
+  g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandE 
+   rror
+ 
+warning: unused import: `Deserialize`
+ --> src\commands.rs:3:13
+  |
+3 | use serde::{Deserialize, Serialize};
+  |             ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused import: `DateTime`
+ --> src\commands.rs:6:14
+  |
+6 | use chrono::{DateTime, Utc};
+  |              ^^^^^^^^
+
+error[E0599]: no method named `optional` 
+found for enum `Result<T, E>` in the current 
+scope
+   --> src\db.rs:89:12
+    |
+ 75 |           let meeting = 
+stmt.query_row(params![meeting_id], |row| {
+    |  _______________________-
+ 76 | |             Ok(Meeting {
+ 77 | |                 id: row.get(0)?,
+ 78 | |                 title: row.get(1)?,
+...   |
+ 88 | |             })
+ 89 | |         }).optional()?;
+    | |           -^^^^^^^^ method not found 
+in `Result<Meeting, rusqlite::Error>`
+    | |___________|
+    |
+    |
+   ::: C:\Users\PMLS\.cargo\registry\src\inde
+x.crates.io-1949cf8c6b5b557f\rusqlite-0.30.0\
+src\lib.rs:279:8
+    |
+279 |       fn optional(self) -> 
+Result<Option<T>>;
+    |          -------- the method is 
+available for `Result<Meeting, 
+rusqlite::Error>` here
+    |
+    = help: items from traits can only be 
+used if the trait is in scope
+help: trait `OptionalExtension` which 
+provides `optional` is implemented but not 
+in scope; perhaps you want to import it
+    |
+  3 + use rusqlite::OptionalExtension;
+    |
+
+error[E0599]: no method named `optional` 
+found for enum `Result<T, E>` in the current 
+scope
+   --> src\db.rs:323:12
+    |
+309 |           let note = 
+stmt.query_row(params![note_id], |row| {
+    |  ____________________-
+310 | |             Ok(Note {
+311 | |                 id: row.get(0)?,
+312 | |                 meeting_id: 
+row.get(1)?,
+...   |
+322 | |             })
+323 | |         }).optional()?;
+    | |           -^^^^^^^^ method not found 
+in `Result<Note, rusqlite::Error>`
+    | |___________|
+    |
+    |
+   ::: C:\Users\PMLS\.cargo\registry\src\inde
+x.crates.io-1949cf8c6b5b557f\rusqlite-0.30.0\
+src\lib.rs:279:8
+    |
+279 |       fn optional(self) -> 
+Result<Option<T>>;
+    |          -------- the method is 
+available for `Result<Note, 
+rusqlite::Error>` here
+    |
+    = help: items from traits can only be 
+used if the trait is in scope
+help: trait `OptionalExtension` which 
+provides `optional` is implemented but not 
+in scope; perhaps you want to import it
+    |
+  3 + use rusqlite::OptionalExtension;
+    |
+
+For more information about this error, try 
+`rustc --explain E0599`.
+warning: `meeting-assistant` (bin 
+"meeting-assistant") generated 2 warnings
+error: could not compile `meeting-assistant` 
+(bin "meeting-assistant") due to 2 previous 
+errors; 2 warnings emitted
