@@ -6,7 +6,8 @@ import {
   Settings, 
   MessageSquare,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Zap
 } from 'lucide-react';
 import { useUIStore } from '@/store';
 import './Sidebar.css';
@@ -15,6 +16,7 @@ const navItems = [
   { path: '/', icon: Home, label: 'Home' },
   { path: '/meeting', icon: Mic, label: 'Meeting' },
   { path: '/history', icon: Clock, label: 'History' },
+  { path: '/integrations', icon: Zap, label: 'Integrations' },
   { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
