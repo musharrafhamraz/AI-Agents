@@ -19,3 +19,7 @@ export type { NoteGenerationConfig } from './noteGeneration';
 
 export { screenCaptureService } from './screenCapture';
 export type { ScreenCaptureConfig } from './screenCapture';
+
+export { integrationService } from './integrations';
+export type { IntegrationConfig, SyncResult } from './integrations';
+
