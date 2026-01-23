@@ -140,8 +140,8 @@ export function SettingsPage() {
     }
 
     try {
-      // Simple API test - just check if key is valid format
-      const response = await fetch('https://api.openai.com/v1/models', {
+      // Test Rev.ai API by fetching account info
+      const response = await fetch('https://api.rev.ai/speechtotext/v1/account', {
         headers: {
           'Authorization': `Bearer ${settings.apiKeys.openaiKey}`,
         },
@@ -222,19 +222,20 @@ export function SettingsPage() {
           <p className="section-description">
             Enter your API keys to enable transcription and AI features.
             Keys are stored locally and never sent to our servers.
+            Get your Rev.ai key at: https://www.rev.ai/access_token
           </p>
 
           <div className="settings-group">
             <label className="settings-label">
-              <span>OpenAI API Key</span>
-              <span className="label-hint">Required for transcription and GPT models</span>
+              <span>Rev.ai API Key</span>
+              <span className="label-hint">Required for transcription with speaker diarization</span>
             </label>
             <div className="input-with-button">
               <input
                 type={showKeys.openai ? 'text' : 'password'}
                 value={settings.apiKeys.openaiKey}
                 onChange={e => updateApiKey('openaiKey', e.target.value)}
-                placeholder="sk-..."
+                placeholder="02..."
                 className="settings-input"
               />
               <button 
