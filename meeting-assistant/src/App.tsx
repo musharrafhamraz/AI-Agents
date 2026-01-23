@@ -4,6 +4,7 @@ import { HomePage } from './pages/HomePage';
 import { MeetingPage } from './pages/MeetingPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { IntegrationsPage } from './pages/IntegrationsPage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/meeting/:id" element={<MeetingPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/integrations" element={<IntegrationsPage />} />
         </Routes>
       </Layout>
     </Router>
